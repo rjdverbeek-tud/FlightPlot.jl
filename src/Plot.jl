@@ -1,6 +1,12 @@
 using Shapefile, Plots
 gr()
 
+function initialize_plot()
+    plot(xaxis=((-80,80), font(6)), yaxis=((-40,40), font(6)), legend = false,
+    grid = true, showaxis = true, ticks = true, xticks = -180.0:10.0:180.0,
+    yticks = -90.0:5.0:90.0, framestyle=:box)
+end
+
 @recipe function f(shapes::Array{Union{Missing, Shapefile.Polygon},1})
     lon = Vector{Float64}()
     lat = Vector{Float64}()
@@ -12,13 +18,8 @@ gr()
         append!(lon, NaN)
         append!(lat, NaN)
     end
-    lon,lat
-end
-
-function initialize_plot()
-    plot(xaxis=((-80,80), font(6)), yaxis=((-40,40), font(6)), legend = false,
-    grid = true, showaxis = true, ticks = true, xticks = -180.0:10.0:180.0,
-    yticks = -90.0:5.0:90.0, framestyle=:box)
+    # x, y = latlon2latlon.(lat, lon)
+    lon, lat
 end
 
 function get_shapefile(shp::String)
@@ -41,4 +42,8 @@ function latlon2gnomonic(centre_point_lat_deg::Float64,
     x = cos(ϕ)sin(λ - λ₀) / cosc
     y = (cos(ϕ₀)sin(ϕ) - sin(ϕ₀)cos(ϕ)cos(λ - λ₀)) / cosc
     return x, y
+end
+
+function latlon2latlon(lat_deg::Float64, lon_deg::Float64)
+    return lon_deg, lat_deg / 2.0
 end
