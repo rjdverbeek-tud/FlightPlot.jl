@@ -10,31 +10,65 @@ struct Lambert
 end
 
 struct Gnomonic
-    center_lat_deg::Float64
     center_lon_deg::Float64
+    center_lat_deg::Float64
 end
 
 
 """
+equirectangular(lon_deg::Float64, lat_deg::Float64)
 Equirectangular projection
 """
-function equirectangular(lat_deg::Float64, lon_deg::Float64)
+function equirectangular(lon_deg::Float64, lat_deg::Float64)
     [lon_deg lat_deg]
 end
 
+"""
+equirectangular_inv(x::Float64, y::Float64)
+Equirectangular projection (inverse)
+"""
+function equirectangular_inv(x::Float64, y::Float64)
+    [x y]
+end
 
 """
+mercator(lon_deg::Float64, lat_deg::Float64, projparam::Mercator)
 Mercator projection
+
+Source: https://mathworld.wolfram.com/MercatorProjection.html
 """
-function mercator(lat_deg::Float64, lon_deg::Float64, projparam::Mercator)
+function mercator(lon_deg::Float64, lat_deg::Float64, projparam::Mercator)
     [(lon_deg-projparam.central_meridian_deg) rad2deg(log(tan(π/4.0 + deg2rad(lat_deg) / 2.0)))]
 end
 
 """
-Lambert cylindrical equal-area
+mercator_inv(x::Float64, y::Float64, projparam::Mercator)
+Mercator projection (inverse)
+
+Source: https://mathworld.wolfram.com/MercatorProjection.html
 """
-function lambert(lat_deg::Float64, lon_deg::Float64, projparam::Lambert)
-    [(lon_deg-projparam.central_meridian_deg) sin(deg2rad(lat_deg))]
+function mercator_inv(x::Float64, y::Float64, projparam::Mercator)
+    [(x + projparam.central_meridian_deg) rad2deg(atan(sinh(deg2rad(y))))]
+end
+
+"""
+lambert(lon_deg::Float64, lat_deg::Float64, projparam::Lambert)
+Lambert cylindrical equal-area
+
+Source: https://mathworld.wolfram.com/CylindricalEqual-AreaProjection.html
+"""
+function lambert(lon_deg::Float64, lat_deg::Float64, projparam::Lambert)
+    [(lon_deg-projparam.central_meridian_deg) rad2deg(sin(deg2rad(lat_deg)))]
+end
+
+"""
+lambert_inv(x::Float64, y::Float64, projparam::Lambert)
+Lambert cylindrical equal-area (inverse)
+
+Source: https://mathworld.wolfram.com/CylindricalEqual-AreaProjection.html
+"""
+function lambert_inv(x::Float64, y::Float64, projparam::Lambert)
+    [(x + projparam.central_meridian_deg) rad2deg(asin(deg2rad(y)))]
 end
 
 """
@@ -42,10 +76,10 @@ gnomonic(lat_deg::Float64, lon_deg::Float64, projparam::Gnomonic)
 
 Source: https://mathworld.wolfram.com/GnomonicProjection.html
 """
-function gnomonic(lat_deg::Float64, lon_deg::Float64, projparam::Gnomonic)
+function gnomonic(lon_deg::Float64, lat_deg::Float64, projparam::Gnomonic)
 
-    limited_point = limitdistance(projparam.center_lat_deg,
-    projparam.center_lon_deg, lat_deg, lon_deg)
+    limited_point = limitdistance(projparam.center_lon_deg,
+    projparam.center_lat_deg, lon_deg, lat_deg)
 
     ϕ₀ = deg2rad(projparam.center_lat_deg)
     λ₀ = deg2rad(projparam.center_lon_deg)
@@ -55,11 +89,39 @@ function gnomonic(lat_deg::Float64, lon_deg::Float64, projparam::Gnomonic)
     cosc = sin(ϕ₀)sin(ϕ) + cos(ϕ₀)cos(ϕ)cos(λ - λ₀)
     x = cos(ϕ)sin(λ - λ₀) / cosc
     y = (cos(ϕ₀)sin(ϕ) - sin(ϕ₀)cos(ϕ)cos(λ - λ₀)) / cosc
-    return [x y]
+    return [rad2deg(x) rad2deg(y)]
 end
 
-function limitdistance(centre_point_lat_deg::Float64,
-    centre_point_lon_deg::Float64, lat_deg::Float64, lon_deg::Float64)
+"""
+gnomonic_inv(x::Float64, y::Float64, projparam::Gnomonic) inverse
+
+Source: https://mathworld.wolfram.com/GnomonicProjection.html
+"""
+function gnomonic_inv(x::Float64, y::Float64, projparam::Gnomonic)
+
+    # limited_point = limitdistance(projparam.center_lon_deg,
+    # projparam.center_lat_deg, lon_deg, lat_deg)
+
+    ϕ₀ = deg2rad(projparam.center_lat_deg)
+    λ₀ = deg2rad(projparam.center_lon_deg)
+
+    xr = deg2rad(x)
+    yr = deg2rad(y)
+
+    ρ = √(xr^2 + yr^2)
+    if ρ != 0.0
+        c = atan(ρ)
+        ϕ = asin(cos(c)sin(ϕ₀) + yr*sin(c)cos(ϕ₀)/ρ)
+        λ = λ₀ + atan(xr*sin(c),ρ*cos(ϕ₀)cos(c)-yr*sin(ϕ₀)sin(c))
+    else  # ρ == 0.0
+        ϕ = ϕ₀
+        λ = λ₀
+    end
+    return [rad2deg(λ) rad2deg(ϕ)]
+end
+
+function limitdistance(centre_point_lon_deg::Float64,
+    centre_point_lat_deg::Float64, lon_deg::Float64, lat_deg::Float64)
     center_point = Navigation.Point_deg(centre_point_lat_deg,
     centre_point_lon_deg)
     point = Navigation.Point_deg(lat_deg, lon_deg)
