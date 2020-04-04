@@ -59,3 +59,26 @@ function lims_map!(mapsettings::MapSettings;
     bottom = projection((xlims[1] + xlims[2])/2.0, ylims[1], mapsettings.projection)[2]
     plot!(xlims=(left, right), ylims=(bottom, top))
 end
+
+function axis_map!(mapsettings::MapSettings;
+    xlims::Tuple{Float64, Float64} = (-180.0, 180.0),
+    ylims::Tuple{Float64, Float64} = (-85.0, 85.0))
+    left = projection(xlims[1], (ylims[1] + ylims[2])/2.0, mapsettings.projection)[1]
+    right = projection(xlims[2], (ylims[1] + ylims[2])/2.0, mapsettings.projection)[1]
+    top = projection((xlims[1] + xlims[2])/2.0, ylims[2], mapsettings.projection)[2]
+    bottom = projection((xlims[1] + xlims[2])/2.0, ylims[1], mapsettings.projection)[2]
+    x = [left, right, right, left, left]
+    y = [bottom, bottom, top, top, bottom]
+    plot!(x,y, linewidth=1.0, linecolor=:black)
+end
+
+#TODO Create ticks_map!
+# function ticks_map!(mapsettings::MapSettings;
+#     xlims::Tuple{Float64, Float64} = (-180.0, 180.0),
+#     ylims::Tuple{Float64, Float64} = (-85.0, 85.0))
+#     for
+#     # left = projection(xlims[1], (ylims[1] + ylims[2])/2.0, mapsettings.projection)[1]
+#     # right = projection(xlims[2], (ylims[1] + ylims[2])/2.0, mapsettings.projection)[1]
+#     # top = projection((xlims[1] + xlims[2])/2.0, ylims[2], mapsettings.projection)[2]
+#     # bottom = projection((xlims[1] + xlims[2])/2.0, ylims[1], mapsettings.projection)[2]
+# end
