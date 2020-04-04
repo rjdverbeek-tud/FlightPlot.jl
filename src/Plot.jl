@@ -84,53 +84,18 @@ function grid2lonlat(grid_lon_deg::StepRangeLen, grid_lat_deg::StepRangeLen)
     lon, lat
 end
 
-@recipe function f(shapes::Array{Union{Missing, Shapefile.Polygon},1}, projparam::Equirectangular)
+@recipe function f(shapes::Array{Union{Missing, Shapefile.Polygon},1}, projparam)
     lon, lat = shapes2lonlat(shapes)
-    points = vcat(equirectangular.(lon, lat)...)
-    points[:,1], points[:,2]
-end
-
-@recipe function f(shapes::Array{Union{Missing, Shapefile.Polygon},1}, projparam::Mercator)
-    lon, lat = shapes2lonlat(shapes)
-    projection(lon::Float64, lat::Float64) = mercator(lon, lat, projparam)
-    points = vcat(projection.(lon, lat)...)
-    points[:,1], points[:,2]
-end
-
-@recipe function f(shapes::Array{Union{Missing, Shapefile.Polygon},1}, projparam::Lambert)
-    lon, lat = shapes2lonlat(shapes)
-    projection(lon::Float64, lat::Float64) = lambert(lon, lat, projparam)
-    points = vcat(projection.(lon, lat)...)
-    points[:,1], points[:,2]
-end
-
-@recipe function f(shapes::Array{Union{Missing, Shapefile.Polygon},1}, projparam::Gnomonic)
-    lon, lat = shapes2lonlat(shapes)
-    projection(lon::Float64, lat::Float64) = gnomonic(lon, lat, projparam)
-    points = vcat(projection.(lon, lat)...)
+    projection_short(ln::Float64, lt::Float64) = projection(ln, lt, projparam)
+    points = vcat(projection_short.(lon, lat)...)
     points[:,1], points[:,2]
 end
 
 @recipe function f(grid_lon_deg::StepRangeLen, grid_lat_deg::StepRangeLen,
-    projparam::Mercator)
+    projparam)
     lon, lat = grid2lonlat(grid_lon_deg, grid_lat_deg)
-    projection(lon::Float64, lat::Float64) = mercator(lon, lat, projparam)
-    points = vcat(projection.(lon, lat)...)
-    points[:,1], points[:,2]
-end
-
-@recipe function f(grid_lon_deg::StepRangeLen, grid_lat_deg::StepRangeLen,
-    projparam::Equirectangular)
-    lon, lat = grid2lonlat(grid_lon_deg, grid_lat_deg)
-    points = vcat(equirectangular.(lon, lat)...)
-    points[:,1], points[:,2]
-end
-
-@recipe function f(grid_lon_deg::StepRangeLen, grid_lat_deg::StepRangeLen,
-    projparam::Gnomonic)
-    lon, lat = grid2lonlat(grid_lon_deg, grid_lat_deg)
-    projection(lon::Float64, lat::Float64) = gnomonic(lon, lat, projparam)
-    points = vcat(projection.(lon, lat)...)
+    projection_short(ln::Float64, lt::Float64) = projection(ln, lt, projparam)
+    points = vcat(projection_short.(lon, lat)...)
     points[:,1], points[:,2]
 end
 

@@ -14,69 +14,72 @@ struct Gnomonic
     center_lat_deg::Float64
 end
 
-
 """
-equirectangular(lon_deg::Float64, lat_deg::Float64)
+projection(lon_deg::Float64, lat_deg::Float64,
+    projparam::Equirectangular=Equirectangular())
 Equirectangular projection
 """
-function equirectangular(lon_deg::Float64, lat_deg::Float64)
+function projection(lon_deg::Float64, lat_deg::Float64,
+    projparam::Equirectangular=Equirectangular())
     [lon_deg lat_deg]
 end
 
 """
-equirectangular_inv(x::Float64, y::Float64)
+projection_inv(x::Float64, y::Float64,
+    projparam::Equirectangular=Equirectangular())
 Equirectangular projection (inverse)
 """
-function equirectangular_inv(x::Float64, y::Float64)
+function projection_inv(x::Float64, y::Float64,
+    projparam::Equirectangular=Equirectangular())
     [x y]
 end
 
 """
-mercator(lon_deg::Float64, lat_deg::Float64, projparam::Mercator)
+projection(lon_deg::Float64, lat_deg::Float64, projparam::Mercator)
 Mercator projection
 
 Source: https://mathworld.wolfram.com/MercatorProjection.html
 """
-function mercator(lon_deg::Float64, lat_deg::Float64, projparam::Mercator)
+function projection(lon_deg::Float64, lat_deg::Float64, projparam::Mercator)
     [(lon_deg-projparam.central_meridian_deg) rad2deg(log(tan(π/4.0 + deg2rad(lat_deg) / 2.0)))]
 end
 
 """
-mercator_inv(x::Float64, y::Float64, projparam::Mercator)
+projection_inv(x::Float64, y::Float64, projparam::Mercator)
 Mercator projection (inverse)
 
 Source: https://mathworld.wolfram.com/MercatorProjection.html
 """
-function mercator_inv(x::Float64, y::Float64, projparam::Mercator)
+function projection_inv(x::Float64, y::Float64, projparam::Mercator)
     [(x + projparam.central_meridian_deg) rad2deg(atan(sinh(deg2rad(y))))]
 end
 
 """
-lambert(lon_deg::Float64, lat_deg::Float64, projparam::Lambert)
+projection(lon_deg::Float64, lat_deg::Float64, projparam::Lambert)
 Lambert cylindrical equal-area
 
 Source: https://mathworld.wolfram.com/CylindricalEqual-AreaProjection.html
 """
-function lambert(lon_deg::Float64, lat_deg::Float64, projparam::Lambert)
+function projection(lon_deg::Float64, lat_deg::Float64, projparam::Lambert)
     [(lon_deg-projparam.central_meridian_deg) rad2deg(sin(deg2rad(lat_deg)))]
 end
 
 """
-lambert_inv(x::Float64, y::Float64, projparam::Lambert)
+projection_inv(x::Float64, y::Float64, projparam::Lambert)
 Lambert cylindrical equal-area (inverse)
 
 Source: https://mathworld.wolfram.com/CylindricalEqual-AreaProjection.html
 """
-function lambert_inv(x::Float64, y::Float64, projparam::Lambert)
+function projection_inv(x::Float64, y::Float64, projparam::Lambert)
     [(x + projparam.central_meridian_deg) rad2deg(asin(deg2rad(y)))]
 end
 
 """
-gnomonic(lat_deg::Float64, lon_deg::Float64, projparam::Gnomonic)
+projection(lat_deg::Float64, lon_deg::Float64, projparam::Gnomonic)
 
 Source: https://mathworld.wolfram.com/GnomonicProjection.html
 """
-function gnomonic(lon_deg::Float64, lat_deg::Float64, projparam::Gnomonic)
+function projection(lon_deg::Float64, lat_deg::Float64, projparam::Gnomonic)
 
     limited_point = limitdistance(projparam.center_lon_deg,
     projparam.center_lat_deg, lon_deg, lat_deg)
@@ -93,11 +96,11 @@ function gnomonic(lon_deg::Float64, lat_deg::Float64, projparam::Gnomonic)
 end
 
 """
-gnomonic_inv(x::Float64, y::Float64, projparam::Gnomonic) inverse
+projection_inv(x::Float64, y::Float64, projparam::Gnomonic) inverse
 
 Source: https://mathworld.wolfram.com/GnomonicProjection.html
 """
-function gnomonic_inv(x::Float64, y::Float64, projparam::Gnomonic)
+function projection_inv(x::Float64, y::Float64, projparam::Gnomonic)
 
     # limited_point = limitdistance(projparam.center_lon_deg,
     # projparam.center_lat_deg, lon_deg, lat_deg)

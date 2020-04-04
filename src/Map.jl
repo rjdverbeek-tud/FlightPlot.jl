@@ -34,33 +34,28 @@ function add_map!(shp::String, projparam=Equirectangular(); kwargs...)
     add_polygon!(shp, projparam; kwargs...)
 end
 
-add_map!(mapsettings::MapSettings; kwargs...) = add_map!(mapsettings.map_filename,
+add_map!(mapsettings::MapSettings) = add_map!(mapsettings.map_filename,
 mapsettings.projection; linecolor=mapsettings.coastcolor,
 fillcolor=mapsettings.landcolor, background_color = mapsettings.seacolor,
-fillalpha=1.0, fillrange=0,
-kwargs...)
+fillalpha=1.0, fillrange=0)
 
-function add_lakes!(shp::String, projparam=Equirectangular();
-    linecolor::RGB{Float64} = CoastColor, fillcolor::RGB{Float64} = SeaColor,
-    kwargs...)
-
-    add_polygon!(shp, projparam; kwargs...)
-end
-
-add_lakes!(mapsettings::MapSettings; kwargs...) = add_map!(
+add_lakes!(mapsettings::MapSettings) = add_map!(
 mapsettings.lake_filename, mapsettings.projection;
 linecolor=mapsettings.coastcolor, fillcolor=mapsettings.seacolor,
-background_color = mapsettings.seacolor, fillalpha=1.0, fillrange=0, kwargs...)
+background_color = mapsettings.seacolor, fillalpha=1.0, fillrange=0)
 
-function add_grid!(mapsettings::MapSettings; kwargs...)
+function add_grid!(mapsettings::MapSettings)
     plot!(mapsettings.xticks, mapsettings.yticks, mapsettings.projection;
     linewidth=mapsettings.gridlinewidth, linecolor=mapsettings.gridcolor,
     linealpha = mapsettings.gridalpha)
 end
 
-# function xlims_map!(mapsettings::MapSettings,
-#     xlims::Tuple{Float64, Float64} = (-180.0, 180.0))
-#     left = MapSettings.projection
-#     right = xlims[2]
-#     plot!(xlims=)
-# end
+function lims_map!(mapsettings::MapSettings;
+    xlims::Tuple{Float64, Float64} = (-180.0, 180.0),
+    ylims::Tuple{Float64, Float64} = (-85.0, 85.0))
+    left = projection(xlims[1], (ylims[1] + ylims[2])/2.0, mapsettings.projection)[1]
+    right = projection(xlims[2], (ylims[1] + ylims[2])/2.0, mapsettings.projection)[1]
+    top = projection((xlims[1] + xlims[2])/2.0, ylims[2], mapsettings.projection)[2]
+    bottom = projection((xlims[1] + xlims[2])/2.0, ylims[1], mapsettings.projection)[2]
+    plot!(xlims=(left, right), ylims=(bottom, top))
+end
