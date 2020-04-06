@@ -57,10 +57,18 @@ end
 function boundaries_map(mapsettings::MapSettings;
     lonlims::Tuple{Float64, Float64} = (-180.0, 180.0),
     latlims::Tuple{Float64, Float64} = (-85.0, 85.0))
-    left = projection(lonlims[1], (latlims[1] + latlims[2])/2.0, mapsettings.projection)[1]
-    right = projection(lonlims[2], (latlims[1] + latlims[2])/2.0, mapsettings.projection)[1]
-    top = projection((lonlims[1] + lonlims[2])/2.0, latlims[2], mapsettings.projection)[2]
-    bottom = projection((lonlims[1] + lonlims[2])/2.0, latlims[1], mapsettings.projection)[2]
+
+    if mapsettings.projection isa Gnomonic
+        left = projection(lonlims[1], (latlims[1] + latlims[2])/2.0, mapsettings.projection)[1]
+        right = projection(lonlims[2], (latlims[1] + latlims[2])/2.0, mapsettings.projection)[1]
+        top = projection((lonlims[1] + lonlims[2])/2.0, latlims[2], mapsettings.projection)[2]
+        bottom = projection((lonlims[1] + lonlims[2])/2.0, latlims[1], mapsettings.projection)[2]
+    else
+        left = projection(lonlims[1], latlims[1], mapsettings.projection)[1]
+        right = projection(lonlims[2], latlims[1], mapsettings.projection)[1]
+        top = projection(lonlims[1], latlims[2], mapsettings.projection)[2]
+        bottom = projection(lonlims[1], latlims[1], mapsettings.projection)[2]
+    end
     left, right, bottom, top
 end
 
@@ -83,6 +91,46 @@ function axis_map!(mapsettings::MapSettings;
 end
 
 function ticks_map!(mapsettings::MapSettings;
+    lonlims::Tuple{Float64, Float64} = (-180.0, 180.0),
+    latlims::Tuple{Float64, Float64} = (-85.0, 85.0))
+    if mapsettings.projection isa Gnomonic
+        return ticks_map_gnomonic!(mapsettings, lonlims, latlims)
+    else
+        return ticks_map_straight!(mapsettings, lonlims, latlims)
+    end
+end
+
+function ticks_map_straight!(mapsettings::MapSettings,
+    lonlims::Tuple{Float64, Float64} = (-180.0, 180.0),
+    latlims::Tuple{Float64, Float64} = (-85.0, 85.0))
+
+    x = Vector{Float64}()
+    lontext = Vector{String}()
+    for lontick in mapsettings.lonticks
+        if lonlims[1] ≤ lontick ≤ lonlims[2]
+            loc = projection(lontick, 0.0, mapsettings.projection)[1]
+            append!(x, loc)
+            lontex = Printf.@sprintf("%4.0f°", lontick)
+            lontext = vcat(lontext, lontex)
+        end
+    end
+
+    y = Vector{Float64}()
+    lattext = Vector{String}()
+    for lattick in mapsettings.latticks
+        if latlims[1] ≤ lattick ≤ latlims[2]
+            loc = projection(0.0, lattick, mapsettings.projection)[2]
+            append!(y, loc)
+            lattex = Printf.@sprintf("%5.1f°", lattick)
+            lattext = vcat(lattext, lattex)
+        end
+    end
+
+    plot!(showaxis=true, xticks = (x, lontext),
+    yticks = (y, lattext), ticks = true)
+end
+
+function ticks_map_gnomonic!(mapsettings::MapSettings,
     lonlims::Tuple{Float64, Float64} = (-180.0, 180.0),
     latlims::Tuple{Float64, Float64} = (-85.0, 85.0))
 
