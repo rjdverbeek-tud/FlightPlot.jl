@@ -1,5 +1,6 @@
 using Navigation
 using Printf
+using Roots
 # const GridColor = RGB(107.0/255.0, 191.0/255.0, 91.0/255.0)
 # const CoastColor = RGB(117.0/255.0, 207.0/255.0, 224.0/255.0)
 # const SeaColor = RGB(205.0/255.0, 235.0/255.0,240.0/255.0)
@@ -112,34 +113,19 @@ function ticks_map!(mapsettings::MapSettings;
     end
     plot!(showaxis=true, xticks = (x,t), ticks = true)
 
-    # #ytick Gnomonic
-    # y = Vector{Float64}()
-    # t = Vector{String}()
-    #
-    # function newton(pos₁::Navigation.Point_deg, pos₂::Navigation.Point_deg,
-    #     lat_deg::Float64, left::Float64, mapsettings::MapSettings)
-    #     first_pos = pos₁
-    #     first_fraction = 0.0
-    #     last_pos = pos₂
-    #     last_fraction = 1.0
-    #     fraction = 0.5
-    #     next_pos = Navigation.intermediate_point(first_pos, last_pos, fraction)
-    #     while abs(next_pos.ϕ - lat_deg) > 0.01
-    #         if next_pos.ϕ - lat_deg > 0.0
-    #         else
-    #         end
-    #     end
-    # end
-    # #
-    # for lattick in mapsettings.latticks
-    #     if ϕ₃ ≤ lattick ≤ ϕ₅
-    #
-    #         # loc = projection(?, lattick, mapsettings.projection)[1]
-    #         txt = Printf.@sprintf("%4.0f°", lattick)
-    #         append!(y, loc)
-    #         t = vcat(t, txt)
-    #     end
-    #
-    # end
-    # plot!(yticks = (y,t))
+    #ytick Gnomonic
+    y = Vector{Float64}()
+    t = Vector{String}()
+
+    for lattick in mapsettings.latticks
+        if ϕ₃ ≤ lattick ≤ ϕ₅
+            f(yloc) = projection_inv(left, yloc, mapsettings.projection)[2] - lattick
+            loc = find_zero(f, (bottom, top))
+            txt = Printf.@sprintf("%5.1f°", lattick)
+            append!(y, loc)
+            t = vcat(t, txt)
+        end
+
+    end
+    plot!(yticks = (y,t))
 end
