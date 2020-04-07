@@ -1,6 +1,7 @@
 using Shapefile, Plots
 using Navigation
 # using DDR2import
+
 gr()
 
 # function initialize_plot()
@@ -31,6 +32,20 @@ function shapes2lonlat(shapes::Array{Union{Missing, Shapefile.Polygon},1})
         for point in shape.points
             append!(lon, point.x)
             append!(lat, point.y)
+        end
+        append!(lon, NaN)
+        append!(lat, NaN)
+    end
+    lon, lat
+end
+
+function sectors2lonlat(sectors::Array{Array{Array{Float64, 2},1},1})
+    lon = Vector{Float64}()
+    lat = Vector{Float64}()
+    for sector in sectors
+        for points in sector
+                append!(lon, points[:,2])
+                append!(lat, points[:,1])
         end
         append!(lon, NaN)
         append!(lat, NaN)
@@ -99,10 +114,26 @@ end
     points[:,1], points[:,2]
 end
 
+@recipe function f(sectors::Vector{Vector{Array{Float64,2}}}, projparam)
+    lon, lat = sectors2lonlat(sectors)
+    projection_short(ln::Float64, lt::Float64) = projection(ln, lt, projparam)
+    points = vcat(projection_short.(lon, lat)...)
+    points[:,1], points[:,2]
+end
+
 function get_shapefile(shp::String)
     return Shapefile.shapes(Shapefile.Table(shp))
 end
 
-function add_polygon!(shp::String, projparam=Equirectangular(); kwargs...)
-    plot!(get_shapefile(shp), projparam; kwargs...)
+# function add_polygon!(shp::String, projparam=Equirectangular(); kwargs...)
+#     plot!(get_shapefile(shp), projparam; kwargs...)
+# end
+
+function add_polygon!(shapes::Array{Union{Missing, Shapefile.Polygon},1}, projparam=Equirectangular(); kwargs...)
+    plot!(shapes, projparam; kwargs...)
+end
+
+#TODO Fix are file reading
+function add_polygon!(sectors::Vector{Vector{Array{Float64,2}}}, projparam=Equirectangular(); kwargs...)
+    plot!(sectors, projparam; kwargs...)
 end

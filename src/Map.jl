@@ -34,8 +34,13 @@ struct MapSettings
     end
 end
 
-function add_map!(shp::String, projparam=Equirectangular(); kwargs...)
-    add_polygon!(shp, projparam; kwargs...)
+# function add_map!(shp::String, projparam=Equirectangular(); kwargs...)
+#     add_polygon!(shp, projparam; kwargs...)
+# end
+
+function add_map!(shapefile::String, projparam=Equirectangular(); kwargs...)
+    shapes = get_shapefile(shapefile)
+    add_polygon!(shapes, projparam; kwargs...)
 end
 
 add_map!(mapsettings::MapSettings) = add_map!(mapsettings.map_filename,
