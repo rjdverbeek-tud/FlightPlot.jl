@@ -30,13 +30,3 @@ end
 
 add_freeflightairspaces!(sectors::String, mapsettings::MapSettings; kwargs...) =
 add_freeflightairspaces!(sectors, mapsettings.projection; kwargs...)
-
-# add_map!(mapsettings::MapSettings) = add_map!(mapsettings.map_filename,
-# mapsettings.projection; linecolor=mapsettings.coastcolor,
-# fillcolor=mapsettings.landcolor, background_color = mapsettings.seacolor,
-# fillalpha=1.0, fillrange=0)
-
-# mapsettings.map_filename,
-# mapsettings.projection; linecolor=mapsettings.coastcolor,
-# fillcolor=mapsettings.landcolor, background_color = mapsettings.seacolor,
-# fillalpha=1.0, fillrange=0
